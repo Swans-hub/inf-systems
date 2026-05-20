@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Вход</title></head>
+<body>
+    <h2>Авторизация</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Логин" required><br>
+        <input type="password" name="password" placeholder="Пароль" required><br>
+        <button type="submit">Войти</button>
+    </form>
+    {% for msg in messages %}<p style="color:red">{{ msg }}</p>{% endfor %}
+    <hr>
+    <p><strong>Тестовые аккаунты:</strong><br>
+    Директор: dir / dir123<br>
+    Зам. директора: deputy / deputy123<br>
+    Секретарь: sec / sec123<br>
+    Гость: guest / guest123</p>
+</body>
+</html>

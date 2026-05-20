@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head><title>Сотрудники</title></head>
+<body>
+    <h2>Список сотрудников ({{ user_group }})</h2>
+    <a href="{% url 'logout' %}">Выйти</a>
+    {% if can_add %}<a href="{% url 'employee_add' %}">+ Добавить</a>{% endif %}
+    <table border="1">
+        <tr>
+            <th>Фамилия</th><th>Имя</th><th>Отчество</th><th>Должность</th>
+            {% if not is_guest %}<th>Адрес</th><th>Личный тел.</th>{% endif %}
+            <th>Раб. тел.</th><th>Действия</th>
+        </tr>
+        {% for emp in employees %}
+        <tr>
+            <td>{{ emp.last_name }}</td>
+            <td>{{ emp.first_name }}</td>
+            <td>{{ emp.patronymic }}</td>
+            <td>{{ emp.position }}</td>
+            {% if not is_guest %}
+                <td>{{ emp.address }}</td>
+                <td>{{ emp.personal_phone }}</td>
+            {% endif %}
+            <td>{{ emp.work_phone }}</td>
+            <td>
+                {% if can_edit %}<a href="{% url 'employee_edit' emp.id %}">✏️</a>{% endif %}
+                {% if can_delete %}<a href="{% url 'employee_delete' emp.id %}" onclick="return confirm('Удалить?')">🗑️</a>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
