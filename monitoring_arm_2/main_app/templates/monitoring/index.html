@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АРМ специалиста - Мониторинг параметров</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .current-value-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .current-value {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .warning-indicator {
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .warning {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .alarm {
+            background-color: #f44336;
+            color: white;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .input-group button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .input-group button:hover {
+            background: #5a67d8;
+        }
+
+        .filter-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+            align-items: center;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn-generate {
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-generate:hover {
+            background: #38a169;
+        }
+
+        .plots {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .plot-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .plot-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .plot-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .previous-values {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .values-list {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .value-item {
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .value-item .val {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .value-item .time {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .average-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .sound-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .sound-btn:hover {
+            background: #38a169;
+        }
+
+        @media (max-width: 768px) {
+            .plots {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 АРМ специалиста по контролю и анализу информации</h1>
+            <p>Мониторинг параметра в реальном времени</p>
+        </div>
+
+        <div class="current-value-panel" id="currentPanel">
+            <h2>Текущее значение параметра</h2>
+            <div class="current-value" id="currentValue">{{ current_value }}</div>
+            <div id="warningIndicator" style="display: none;" class="warning-indicator warning">
+                ⚠️ ВНИМАНИЕ! Изменение значения более чем на {{ n2 }}%
+            </div>
+            <div id="alarmIndicator" style="display: none;" class="warning-indicator alarm">
+                🚨 ТРЕВОГА! Выход из допустимой области значений!
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <input type="number" id="newValue" step="any" placeholder="Введите новое значение параметра">
+                <button onclick="addValue()">Добавить значение</button>
+            </div>
+
+            <div class="filter-section">
+                <h3>🔍 Фильтрация данных</h3>
+                <div class="filter-group">
+                    <select id="selectionType">
+                        <option value="all">Все значения</option>
+                        <option value="greater">Больше заданной границы</option>
+                        <option value="less">Меньше заданной границы</option>
+                        <option value="multiple">Кратно заданному числу</option>
+                    </select>
+
+                    <div id="thresholdGroup" style="display: none;">
+                        <label>Граница: </label>
+                        <input type="number" id="threshold" step="any" placeholder="Введите границу">
+                    </div>
+
+                    <div id="multipleGroup" style="display: none;">
+                        <label>Кратность: </label>
+                        <input type="number" id="multiple" step="any" placeholder="Введите число">
+                    </div>
+
+                    <button class="btn-generate" onclick="generatePlots()">Построить графики</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="plots">
+            <div class="plot-card">
+                <h3>📈 График значений параметра</h3>
+                <div id="plotContainer">
+                    <img id="plotImage" src="" alt="График">
+                </div>
+                <div id="averageInfo" class="average-info" style="display: none;">
+                    Среднее значение выбранных данных: <strong id="avgValue">0</strong>
+                </div>
+            </div>
+
+            <div class="plot-card">
+                <h3>📊 Диаграмма выборочных значений</h3>
+                <div id="chartContainer">
+                    <img id="chartImage" src="" alt="Диаграмма">
+                </div>
+            </div>
+        </div>
+
+        <div class="previous-values">
+            <h3>📋 Последние {{ n1 }} значений</h3>
+            <div class="values-list" id="previousList">
+                {% for val in previous_values %}
+                <div class="value-item">
+                    <div class="val">{{ val }}</div>
+                    <div class="time">{{ timestamps|slice:forloop.counter0 }}</div>
+                </div>
+                {% empty %}
+                <p>Нет данных</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <button class="sound-btn" onclick="enableSound()">🔊 Включить звук (нажми сюда)</button>
+
+    <script>
+        let currentValues = [];
+        let currentTimestamps = [];
+        let lastValue = {{ current_value }};
+        let n2 = {{ n2 }};
+        let soundEnabled = false;
+        let audioCtx = null;
+
+        // Функция включения звука (должна быть вызвана по клику пользователя)
+        function enableSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                audioCtx.resume().then(() => {
+                    soundEnabled = true;
+                    console.log('Звук включен');
+                    const btn = document.querySelector('.sound-btn');
+                    btn.textContent = '🔊 Звук активен';
+                    btn.style.background = '#38a169';
+                    setTimeout(() => {
+                        btn.textContent = '🔊 Включить звук (нажми сюда)';
+                        btn.style.background = '#48bb78';
+                    }, 2000);
+                });
+            } catch(e) {
+                console.log('Web Audio API не поддерживается');
+                alert('Ваш браузер не поддерживает звук');
+            }
+        }
+
+        function playBeep() {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.frequency.value = 880;  // частота звука (ля второй октавы)
+                gainNode.gain.value = 0.3;          // громкость
+
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } catch(e) {
+                console.log('Ошибка воспроизведения звука');
+            }
+        }
+
+        function playAlarm() {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                // Первый сигнал
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.frequency.value = 620;
+                gain1.gain.value = 0.4;
+                osc1.start();
+                gain1.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
+                osc1.stop(audioCtx.currentTime + 0.25);
+
+                // Второй сигнал (повышенный)
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.frequency.value = 820;
+                    gain2.gain.value = 0.5;
+                    osc2.start();
+                    gain2.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
+                    osc2.stop(audioCtx.currentTime + 0.25);
+                }, 300);
+
+                // Третий сигнал
+                setTimeout(() => {
+                    const osc3 = audioCtx.createOscillator();
+                    const gain3 = audioCtx.createGain();
+                    osc3.connect(gain3);
+                    gain3.connect(audioCtx.destination);
+                    osc3.frequency.value = 620;
+                    gain3.gain.value = 0.4;
+                    osc3.start();
+                    gain3.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
+                    osc3.stop(audioCtx.currentTime + 0.25);
+                }, 600);
+            } catch(e) {
+                console.log('Ошибка воспроизведения тревоги');
+            }
+        }
+
+        // Обновление отображения фильтров
+        document.getElementById('selectionType').addEventListener('change', function() {
+            const type = this.value;
+            document.getElementById('thresholdGroup').style.display = type === 'greater' || type === 'less' ? 'flex' : 'none';
+            document.getElementById('multipleGroup').style.display = type === 'multiple' ? 'flex' : 'none';
+        });
+
+        function addValue() {
+            const newValue = parseFloat(document.getElementById('newValue').value);
+            if (isNaN(newValue)) {
+                alert('Введите корректное значение');
+                return;
+            }
+
+            fetch('/add_data/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({value: newValue})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    currentValues = data.all_values;
+                    currentTimestamps = data.timestamps;
+                    updateDisplay(data.current_value, data.warning);
+                    document.getElementById('newValue').value = '';
+                    updatePreviousValues();
+                }
+            });
+        }
+
+        function updateDisplay(currentValue, warning) {
+            document.getElementById('currentValue').innerText = currentValue;
+
+            const warningDiv = document.getElementById('warningIndicator');
+            if (warning) {
+                warningDiv.style.display = 'block';
+                playBeep();
+                setTimeout(() => {
+                    warningDiv.style.display = 'none';
+                }, 3000);
+            } else {
+                warningDiv.style.display = 'none';
+            }
+
+            // Проверка выхода из допустимой области (0-100)
+            const alarmDiv = document.getElementById('alarmIndicator');
+            if (currentValue < 0 || currentValue > 100) {
+                if (alarmDiv.style.display !== 'block') {
+                    alarmDiv.style.display = 'block';
+                    playAlarm();
+                }
+            } else {
+                alarmDiv.style.display = 'none';
+            }
+        }
+
+        function updatePreviousValues() {
+            const listDiv = document.getElementById('previousList');
+            if (currentValues.length > 0) {
+                let html = '';
+                for (let i = 0; i < Math.min(5, currentValues.length); i++) {
+                    html += `
+                        <div class="value-item">
+                            <div class="val">${currentValues[i]}</div>
+                            <div class="time">${currentTimestamps[i] || ''}</div>
+                        </div>
+                    `;
+                }
+                listDiv.innerHTML = html;
+            }
+        }
+
+        function generatePlots() {
+            if (currentValues.length === 0) {
+                alert('Нет данных для построения графиков');
+                return;
+            }
+
+            const selectionType = document.getElementById('selectionType').value;
+            const threshold = parseFloat(document.getElementById('threshold').value) || 0;
+            const multiple = parseFloat(document.getElementById('multiple').value) || 1;
+
+            fetch('/generate_plots/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    values: currentValues,
+                    selection_type: selectionType,
+                    threshold: threshold,
+                    multiple: multiple
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('plotImage').src = 'data:image/png;base64,' + data.plot_url;
+                    document.getElementById('chartImage').src = 'data:image/png;base64,' + data.chart_url;
+                    document.getElementById('avgValue').innerText = data.average.toFixed(2);
+                    document.getElementById('averageInfo').style.display = 'block';
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            });
+        }
+
+        // Загрузка начальных данных
+        {% if timestamps %}
+        currentValues = [{{ current_value }}{% for val in previous_values %}, {{ val }}{% endfor %}];
+        currentTimestamps = ["{{ timestamps.0 }}"{% for ts in timestamps|slice:"1:" %}, "{{ ts }}"{% endfor %}];
+        {% endif %}
+
+        // Генерация начальных графиков
+        if (currentValues.length > 0) {
+            setTimeout(generatePlots, 500);
+        }
+    </script>
+</body>
+</html>
