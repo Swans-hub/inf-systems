@@ -1,0 +1,38 @@
+{% extends 'counterparties/base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>📄 {{ counterparty.name }}</h3>
+        <div>
+            <a href="{% url 'counterparties:counterparty_list' %}" class="btn btn-secondary">← Назад</a>
+            <a href="{% url 'counterparties:counterparty_edit' counterparty.pk %}" class="btn btn-warning">✏️ Редактировать</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <form method="post" action="{% url 'counterparties:check_inn_button' counterparty.pk %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">🔍 Проверить ИНН</button>
+            </form>
+            <span class="ms-3 text-muted">Проверка на дубликаты и вхождение как подстроки</span>
+        </div>
+
+        <table class="table table-bordered">
+            <tr><th>Код</th><td>{{ counterparty.code }}</td></tr>
+            <tr><th>Наименование</th><td>{{ counterparty.name }}</td></tr>
+            <tr><th>Краткое наименование</th><td>{{ counterparty.short_name|default:"—" }}</td></tr>
+            <tr><th>ИНН</th><td class="fw-bold">{{ counterparty.inn }}</td></tr>
+            <tr><th>КПП</th><td>{{ counterparty.kpp|default:"—" }}</td></tr>
+            <tr><th>ОГРН</th><td>{{ counterparty.ogrn|default:"—" }}</td></tr>
+            <tr><th>Юридический адрес</th><td>{{ counterparty.legal_address|default:"—"|linebreaks }}</td></tr>
+            <tr><th>Фактический адрес</th><td>{{ counterparty.actual_address|default:"—"|linebreaks }}</td></tr>
+            <tr><th>Телефон</th><td>{{ counterparty.phone|default:"—" }}</td></tr>
+            <tr><th>Email</th><td>{{ counterparty.email|default:"—" }}</td></tr>
+            <tr><th>Статус</th><td>{% if counterparty.is_active %}Активен{% else %}Неактивен{% endif %}</td></tr>
+            <tr><th>Пометка на удаление</th><td>{% if counterparty.is_marked_for_deletion %}✅ Да{% else %}❌ Нет{% endif %}</td></tr>
+            <tr><th>Комментарий</th><td>{{ counterparty.comment|default:"—" }}</td></tr>
+            <tr><th>Дата создания</th><td>{{ counterparty.created_at|date:"d.m.Y H:i" }}</td></tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'counterparties/base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h3>🗑️ Подтверждение удаления</h3></div>
+    <div class="card-body">
+        <p>Вы уверены, что хотите пометить на удаление контрагента <strong>"{{ counterparty.name }}"</strong>?</p>
+        <p class="text-danger">Внимание! Контрагент не будет удален полностью, только помечен на удаление.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">✅ Да, пометить на удаление</button>
+            <a href="{% url 'counterparties:counterparty_list' %}" class="btn btn-secondary">❌ Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

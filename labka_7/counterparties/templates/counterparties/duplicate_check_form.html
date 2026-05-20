@@ -1,0 +1,17 @@
+{% extends 'counterparties/base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h3>🔍 Поиск дубликатов ИНН</h3></div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <p>Будут найдены все контрагенты с одинаковыми ИНН. Дубликаты (все кроме первого) будут помечены на удаление.</p>
+            <div class="alert alert-warning">
+                ⚠️ Внимание! Это действие изменит данные. Рекомендуется сделать резервную копию.
+            </div>
+            <button type="submit" class="btn btn-warning">🔍 Найти и пометить дубликаты</button>
+            <a href="{% url 'counterparties:counterparty_list' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
