@@ -1,0 +1,43 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Данные</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #2196F3; color: white; }
+        .btn-add { background: #28a745; color: white; padding: 5px 10px; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Данные</h1>
+    <a href="/records/add/" class="btn-add">+ Добавить запись</a>
+    <a href="/">На главную</a>
+    <br><br>
+    <table>
+        <tr>
+            <th>ID</th>
+            {% for field in fields %}
+                <th>{{ field.label }}</th>
+            {% endfor %}
+            <th></th>
+        </tr>
+        {% for record in records %}
+        <tr>
+            <td>{{ record.id }}</td>
+            {% for field in fields %}
+                <td>{{ record.data|get_item:field.name }}</td>
+            {% endfor %}
+            <td>
+                <a href="/records/edit/{{ record.id }}/">✏️</a>
+                <a href="/records/delete/{{ record.id }}/">🗑️</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10">Нет данных. Добавьте первую запись.</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

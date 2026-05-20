@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Удалить поле</title>
+</head>
+<body>
+    <h1>Удалить поле "{{ field.label }}"?</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Да</button>
+        <a href="/fields/">Нет</a>
+    </form>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Структура</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #4CAF50; color: white; }
+        .btn-add { background: #28a745; color: white; padding: 5px 10px; text-decoration: none; }
+        .btn-edit { background: #ffc107; padding: 3px 8px; text-decoration: none; }
+        .btn-del { background: #dc3545; color: white; padding: 3px 8px; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Структура данных</h1>
+    <a href="/fields/add/" class="btn-add">+ Добавить поле</a>
+    <a href="/">На главную</a>
+    <br><br>
+    <table>
+        <tr>
+            <th>Имя поля</th><th>Название</th><th>Тип</th><th>Порядок</th><th></th>
+        </tr>
+        {% for field in fields %}
+        <tr>
+            <td>{{ field.name }}</td>
+            <td>{{ field.label }}</td>
+            <td>{{ field.get_field_type_display }}</td>
+            <td>{{ field.order }}</td>
+            <td>
+                <a href="/fields/edit/{{ field.id }}/" class="btn-edit">✏️</a>
+                <a href="/fields/delete/{{ field.id }}/" class="btn-del">🗑️</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Нет полей. Добавьте первое поле.</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

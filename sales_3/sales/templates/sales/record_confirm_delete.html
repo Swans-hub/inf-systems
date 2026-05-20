@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Удалить запись</title>
+</head>
+<body>
+    <h1>Удалить запись #{{ record.id }}?</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Да</button>
+        <a href="/records/">Нет</a>
+    </form>
+</body>
+</html>

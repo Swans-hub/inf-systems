@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Прибыль по группам</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 50%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #ff9800; }
+        .btn { background: #28a745; color: white; padding: 10px 15px; text-decoration: none; display: inline-block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Прибыль по группам товаров</h1>
+    <a href="/export/" class="btn">📎 Экспорт в Excel</a>
+    <a href="/">На главную</a>
+    <br><br>
+    <table>
+        <tr><th>Группа товаров</th><th>Прибыль, руб.</th></tr>
+        {% for item in report_data %}
+        <tr><td>{{ item.group }}</td><td>{{ item.profit }}</td></tr>
+        {% empty %}
+        <tr><td colspan="2">Нет данных</td></tr>
+        {% endfor %}
+        <tr style="font-weight: bold;"><td>ИТОГО:</td><td>{{ total_profit }}</td></tr>
+    </table>
+</body>
+</html>
