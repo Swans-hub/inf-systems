@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчет по автопарку</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .chart-container {
+            width: 80%;
+            margin: 40px auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        hr {
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📊 Отчет по автопарку</h1>
+
+    <div class="chart-container">
+        <h2>📈 Пробег водителей</h2>
+        <canvas id="driverChart"></canvas>
+    </div>
+
+    <hr>
+
+    <div class="chart-container">
+        <h2>⛽ Расход топлива по автомобилям</h2>
+        <canvas id="carChart"></canvas>
+    </div>
+
+    <script>
+        // Данные из Django
+        const drivers = {{ drivers_data|safe }};
+        const avgDistance = {{ avg_distance|safe }};
+        const cars = {{ cars_data|safe }};
+        const avgFuel = {{ avg_fuel|safe }};
+
+        // График по водителям
+        const driverCtx = document.getElementById('driverChart').getContext('2d');
+        new Chart(driverCtx, {
+            type: 'bar',
+            data: {
+                labels: drivers.map(d => d.name),
+                datasets: [{
+                    label: 'Пробег (км)',
+                    data: drivers.map(d => d.distance),
+                    backgroundColor: '#3498db',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} км` } }
+                }
+            },
+            plugins: [{
+                afterDraw(chart) {
+                    if (avgDistance > 0) {
+                        const yScale = chart.scales.y;
+                        const yValue = yScale.getPixelForValue(avgDistance);
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#e74c3c';
+                        ctx.lineWidth = 3;
+                        ctx.setLineDash([5, 5]);
+                        ctx.moveTo(chart.chartArea.left, yValue);
+                        ctx.lineTo(chart.chartArea.right, yValue);
+                        ctx.stroke();
+                        ctx.restore();
+
+                        // Подпись
+                        chart.ctx.fillStyle = '#e74c3c';
+                        chart.ctx.font = 'bold 12px Arial';
+                        chart.ctx.fillText(`Средний пробег: ${avgDistance.toFixed(1)} км`,
+                            chart.chartArea.right - 150, yValue - 5);
+                    }
+                }
+            }]
+        });
+
+        // График по автомобилям
+        const carCtx = document.getElementById('carChart').getContext('2d');
+        new Chart(carCtx, {
+            type: 'bar',
+            data: {
+                labels: cars.map(c => c.name),
+                datasets: [{
+                    label: 'Расход топлива (л)',
+                    data: cars.map(c => c.fuel),
+                    backgroundColor: '#2ecc71',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} л` } }
+                }
+            },
+            plugins: [{
+                afterDraw(chart) {
+                    if (avgFuel > 0) {
+                        const yScale = chart.scales.y;
+                        const yValue = yScale.getPixelForValue(avgFuel);
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#e74c3c';
+                        ctx.lineWidth = 3;
+                        ctx.setLineDash([5, 5]);
+                        ctx.moveTo(chart.chartArea.left, yValue);
+                        ctx.lineTo(chart.chartArea.right, yValue);
+                        ctx.stroke();
+                        ctx.restore();
+
+                        chart.ctx.fillStyle = '#e74c3c';
+                        chart.ctx.font = 'bold 12px Arial';
+                        chart.ctx.fillText(`Средний расход: ${avgFuel.toFixed(1)} л`,
+                            chart.chartArea.right - 150, yValue - 5);
+                    }
+                }
+            }]
+        });
+    </script>
+
+</body>
+</html>
