@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт «Подотчетники»</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .filter-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .filter-group button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .filter-group button:hover {
+            background: #5a67d8;
+        }
+
+        .total-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .total-badge span:first-child {
+            opacity: 0.9;
+        }
+
+        .grand-amount {
+            font-size: 22px;
+            color: #ffd700;
+        }
+
+        .table-container {
+            padding: 0 30px 30px 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .clickable-row:hover {
+            background: #f0f0ff;
+        }
+
+        .toggle-icon {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .details-row {
+            display: none;
+            background: #fafafa;
+        }
+
+        .details-row.show {
+            display: table-row;
+        }
+
+        .details-cell {
+            padding: 20px 30px 20px 50px;
+        }
+
+        .details-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+        .details-table td, .details-table th {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            font-size: 13px;
+        }
+
+        .details-table th {
+            background: #e9ecef;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .print-btn {
+            background: #28a745;
+            margin-left: auto;
+        }
+
+        .print-btn:hover {
+            background: #218838;
+        }
+
+        @media print {
+            .filter-section, .print-btn, .no-print {
+                display: none;
+            }
+            .details-row {
+                display: table-row;
+            }
+            body {
+                padding: 0;
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📋 Отчёт «Подотчетники»</h1>
+        <p>Денежные средства, выданные под отчет сотрудникам</p>
+    </div>
+
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <label>📅 Дата с</label>
+                <input type="date" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="filter-group">
+                <label>📅 Дата по</label>
+                <input type="date" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="filter-group">
+                <button type="submit">🔍 Применить фильтр</button>
+            </div>
+            <div class="filter-group">
+                <button type="button" class="print-btn" onclick="window.print()">🖨️ Печать</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="total-badge">
+        <span>💰 ИТОГО по всем сотрудникам:</span>
+        <span class="grand-amount">{{ grand_total|floatformat:2 }} руб.</span>
+    </div>
+
+    <div class="table-container">
+        <table id="reportTable">
+            <thead>
+                <tr><th style="width: 40px"></th><th>№ п/п</th><th>Сотрудник</th><th>Общая сумма (руб.)</th></tr>
+            </thead>
+            <tbody>
+                {% for item in report_list %}
+                <tr class="clickable-row" onclick="toggleDetails('detail-{{ forloop.counter }}', this)">
+                    <td class="toggle-icon">▶</td>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ item.name }}</strong></td>
+                    <td class="amount">{{ item.total|floatformat:2 }} руб.</td>
+                </tr>
+                <tr id="detail-{{ forloop.counter }}" class="details-row">
+                    <td colspan="4" class="details-cell">
+                        <strong>📄 Детализация выдач:</strong>
+                        <table class="details-table">
+                            <tr>
+                                <th>Дата</th>
+                                <th>Сумма (руб.)</th>
+                                <th>Назначение</th>
+                            </tr>
+                            {% for detail in item.details %}
+                            <tr>
+                                <td>{{ detail.date|date:"d.m.Y" }}</td>
+                                <td>{{ detail.amount|floatformat:2 }}</td>
+                                <td>{{ detail.purpose|default:"—" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align: center; padding: 40px;">📭 Нет данных за выбранный период</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleDetails(id, row) {
+        const detailRow = document.getElementById(id);
+        const icon = row.querySelector('.toggle-icon');
+        if (detailRow.classList.contains('show')) {
+            detailRow.classList.remove('show');
+            icon.textContent = '▶';
+        } else {
+            detailRow.classList.add('show');
+            icon.textContent = '▼';
+        }
+    }
+</script>
+</body>
+</html>
