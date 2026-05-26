@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Печатная форма - Начисление зарплаты</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Цвета по заданию */
+        .high {
+            background-color: #ffcccc;  /* красный - выше верхнего порога */
+        }
+
+        .low {
+            background-color: #ccffcc;  /* зеленый - ниже нижнего порога */
+        }
+
+        .multiple {
+            background-color: #ccccff;  /* синий - кратно 100 */
+        }
+
+        .normal {
+            background-color: #ffffff;  /* белый - между порогами */
+        }
+
+        .total-row {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+
+        .print-btn {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .print-btn:hover {
+            background-color: #45a049;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">🖨️ Печать</button>
+
+    <h2>Печатная форма начисленной зарплаты сотрудникам</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>№ п/п</th>
+                <th>Сотрудник</th>
+                <th>Начислено (руб.)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for accrual in accruals %}
+            <tr class="{{ accrual.color_class }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ accrual.employee.name }}</td>
+                <td>{{ accrual.amount|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center;">Нет данных</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2"><strong>ИТОГО:</strong></td>
+                <td><strong>{{ total_sum|floatformat:2 }} руб.</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p style="text-align: center; font-size: 12px; color: gray;">
+        Отчет сформирован: {% now "d.m.Y H:i" %}
+    </p>
+
+</body>
+</html>
